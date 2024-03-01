@@ -12,13 +12,13 @@ import tw from "tailwind-react-native-classnames";
 import { GooglePlacesAutocomplete } from "react-native-google-places-autocomplete";
 import NavFavourites from "./NavFavourites";
 import { useNavigation } from "@react-navigation/native"; // import
-import { OpenStreetMapProvider } from "leaflet-geosearch";
+// import { OpenStreetMapProvider } from "leaflet-geosearch";
 
 const NavigateCard = () => {
   const [search, setSearch] = useState("Hello");
   const navigation = useNavigation();
   // setup
-  const provider = new OpenStreetMapProvider();
+  // const provider = new OpenStreetMapProvider();
 
   // search
   return (
@@ -27,6 +27,13 @@ const NavigateCard = () => {
         <Text style={tw`text-center py-5`}>Greetings User!</Text>
         <View style={tw`border-t border-gray-200 flex-shrink`}>
           <View>
+            <GooglePlacesAutocomplete
+              placeholder="From?"
+              styles={toInputBoxStyles}
+              nearbyPlacesAPI="GooglePlacesSearch"
+
+              // debounce={400}
+            />
             <GooglePlacesAutocomplete
               placeholder="Where to ?"
               styles={toInputBoxStyles}

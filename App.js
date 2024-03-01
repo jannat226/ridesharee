@@ -62,7 +62,7 @@ export default function App() {
               <Stack.Screen
                 name="MapScreen"
                 component={TravellerScreen}
-                // options={{ title: "Welcome" }}
+                initialParams={{ db: db, userName: auth?.currentUser?.email }}
               />
               <Stack.Screen
                 name="Map2Screen"

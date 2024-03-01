@@ -8,19 +8,27 @@ import MapView, { Marker } from "react-native-maps";
 // import { MapMarker } from "react-native-maps";
 import * as Location from "expo-location";
 
-const TravellerScreen = () => {
+const TravellerScreen = ({ route }) => {
   const [location, setLocation] = useState({ latitude: 0.0, longitude: 0.0 });
+  const { db, userName } = route.params;
 
   useEffect(() => {
-    (async () => {
-      const locationValue = await Location.getCurrentPositionAsync({});
-      // setLocation(locationValue);
-      console.log(locationValue);
-      setLocation({
-        latitude: locationValue.coords.latitude,
-        longitude: locationValue.coords.longitude,
-      });
-    })();
+    Location.getCurrentPositionAsync({}).then((res) => {
+      var docRef = db.collection("drivers").doc("SF");
+      docRef
+        .get()
+        .then((doc) => {
+          if (doc.exists) {
+            console.log("Document data:", doc.data());
+          } else {
+            // doc.data() will be undefined in this case
+            console.log("No such document!");
+          }
+        })
+        .catch((error) => {
+          console.log("Error getting document:", error);
+        });
+    });
   }, []);
 
   // console.log(locationValue);

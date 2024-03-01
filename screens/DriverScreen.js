@@ -53,13 +53,7 @@ const DriverScreen = ({ route }) => {
 
   useEffect(() => {
     console.log(userName, location);
-    setDoc(doc(db, "drivers", userName), location)
-      .then((res) => {
-        console.log("Sucess", res);
-      })
-      .catch((err) => {
-        console.error(err);
-      });
+    setDoc(doc(db, "drivers", userName), location);
   }, [location]);
 
   const handleAcceptRide = () => {
