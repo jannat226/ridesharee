@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Provider } from "react-redux";
 import { collection, addDoc } from "firebase/firestore";
 import * as Location from "expo-location";
@@ -25,13 +25,25 @@ import RecievePaymentReviewPassangerScreen from "./screens/RecievePaymentReviewP
 import DoPaymentReviewRiderScreen from "./screens/DoPaymentReviewRiderScreen";
 import ReviewScreen from "./screens/ReviewScreen";
 import ThanksScreen from "./screens/ThanksScreen";
-import { db, auth } from "./config/firebaseConfig";
-import { useEffect } from "react";
+import { db } from "./config/firebaseConfig";
+import { useEffect, useState } from "react";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 
 const Stack = createNativeStackNavigator();
 
+const auth = getAuth();
+
 export default function App() {
+  const [user, setUser] = useState();
   useEffect(() => {
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+    });
+
     (async () => {
       let { status } = await Location.requestForegroundPermissionsAsync();
       console.log("asking for permmission");
@@ -44,6 +56,16 @@ export default function App() {
       }
     })();
   }, []);
+
+  // splashscreen styling
+  if (user === undefined) {
+    return (
+      <View>
+        <ActivityIndicator size="large" color="#0000ff" />
+        <Text>Loading...</Text>
+      </View>
+    );
+  }
 
   return (
     <Provider store={store}>
@@ -62,12 +84,12 @@ export default function App() {
               <Stack.Screen
                 name="MapScreen"
                 component={TravellerScreen}
-                initialParams={{ db: db, userName: auth?.currentUser?.email }}
+                initialParams={{ db: db, userName: user?.email }}
               />
               <Stack.Screen
                 name="Map2Screen"
                 component={DriverScreen}
-                initialParams={{ db: db, userName: auth?.currentUser?.email }}
+                initialParams={{ db: db, userName: user?.email }}
               />
               <Stack.Screen
                 name="RideOptionsCard"

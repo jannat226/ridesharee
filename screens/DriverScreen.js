@@ -25,6 +25,7 @@ const DriverScreen = ({ route }) => {
   });
   const [passengerCount, setPassengerCount] = useState("");
   const { db, userName } = route.params;
+  console.log(db, userName);
 
   useEffect(() => {
     let subscription;
@@ -54,7 +55,7 @@ const DriverScreen = ({ route }) => {
   useEffect(() => {
     console.log(userName, location);
     setDoc(doc(db, "drivers", userName), location);
-  }, [location]);
+  }, [location, db]);
 
   const handleAcceptRide = () => {
     // Perform actions when the driver accepts the ride

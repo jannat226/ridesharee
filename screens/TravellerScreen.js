@@ -9,11 +9,17 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 
 const TravellerScreen = ({ route }) => {
+  const [inputValue, setInputValue] = useState("");
   const [location, setLocation] = useState({ latitude: 0.0, longitude: 0.0 });
   const { db, userName } = route.params;
 
   useEffect(() => {
     Location.getCurrentPositionAsync({}).then((res) => {
+      setLocation({
+        latitude: res.coords.latitude,
+        longitude: res.coords.longitude,
+      });
+      console.log("lat , long", res.coords);
       var docRef = db.collection("drivers").doc("SF");
       docRef
         .get()
@@ -56,7 +62,7 @@ const TravellerScreen = ({ route }) => {
           />
         </MapView>
       </View>
-      {/* <Map></Map> */}
+
       <View style={tw`h-2/3`}>
         <NavigateCard />
       </View>
