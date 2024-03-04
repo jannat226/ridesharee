@@ -2298,6 +2298,10 @@
     "prompts" "^2.4.0"
     "semver" "^7.5.2"
 
+"@react-native-picker/picker@github:react-native-picker/picker":
+  "resolved" "git+ssh://git@github.com/react-native-picker/picker.git#85c1c06af3e06a54f7b363e630264a9c0983f92e"
+  "version" "2.6.1"
+
 "@react-native/assets-registry@^0.72.0":
   "integrity" "sha512-Im93xRJuHHxb1wniGhBMsxLwcfzdYreSZVQGDoMJgkd6+Iky61LInGEHnQCTN0fKNYF1Dvcofb4uMmE1RQHXHQ=="
   "resolved" "https://registry.npmjs.org/@react-native/assets-registry/-/assets-registry-0.72.0.tgz"
@@ -6585,6 +6589,13 @@
   "version" "1.7.1"
   dependencies:
     "@types/geojson" "^7946.0.10"
+
+"react-native-picker-select@^9.0.1":
+  "integrity" "sha512-iIhb82OSH1vqB/HoipvbuX3RCzmeaQmIASlaRbv6X8imNjzh1DH/LaKoF4+DAZJLT0iX7QG79vpwZu8wjWap3Q=="
+  "resolved" "https://registry.npmjs.org/react-native-picker-select/-/react-native-picker-select-9.0.1.tgz"
+  "version" "9.0.1"
+  dependencies:
+    "lodash.isequal" "^4.5.0"
 
 "react-native-popover-view@^5.1.8":
   "integrity" "sha512-kDH2liv/Xb8y0JCY25Ft2SiA5fJtVL4o7gk2dXyhXeNhjSEEss3Z3hZyeYMi4ctHimovWSBZz/CjfejNbUF1jA=="

@@ -1,16 +1,26 @@
-import { Dimensions, StyleSheet, Text, View } from "react-native";
+import {
+  Dimensions,
+  StyleSheet,
+  View,
+  Text,
+  ActivityIndicator,
+  StyleSheet,
+} from "react-native";
 import React, { useEffect, useState } from "react";
 import tw from "tailwind-react-native-classnames";
-import Map from "../components/Map";
-// import { LatLng, LeafletView, MapMarker } from "react-native-leaflet-view";
 import NavigateCard from "../components/NavigateCard";
 import MapView, { Marker } from "react-native-maps";
-// import { MapMarker } from "react-native-maps";
 import * as Location from "expo-location";
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
+
+// distance from the user
+const distanceDelta = 500;
 
 const TravellerScreen = ({ route }) => {
   const [inputValue, setInputValue] = useState("");
   const [location, setLocation] = useState({ latitude: 0.0, longitude: 0.0 });
+  const [startLocation, setStartLocation] = useState({});
+  const [endLocation, setEndLocation] = useState({});
   const { db, userName } = route.params;
 
   useEffect(() => {
@@ -19,7 +29,6 @@ const TravellerScreen = ({ route }) => {
         latitude: res.coords.latitude,
         longitude: res.coords.longitude,
       });
-      console.log("lat , long", res.coords);
       var docRef = db.collection("drivers").doc("SF");
       docRef
         .get()
@@ -37,11 +46,63 @@ const TravellerScreen = ({ route }) => {
     });
   }, []);
 
-  // console.log(locationValue);
+  useEffect(() => {
+    getNearbyDrivers();
+  }, [startLocation]);
+
+  async function getNearbyDrivers() {
+    // TODO: show prompt for searching...
+
+    if (startLocation != null && endLocation != null) {
+      console.log("reached here");
+      // firebase query to get nearby drivers
+      const driversRef = collection(db, "drivers");
+      const new_lat_greater = addMetersToLatitude(
+        startLocation.latitude,
+        distanceDelta
+      );
+      const new_lat_smaller = addMetersToLatitude(
+        startLocation.latitude,
+        -1 * distanceDelta
+      );
+
+      const q = query(
+        driversRef,
+        where("latitude", "<", new_lat_greater),
+        where("latitude", ">", new_lat_smaller),
+        limit(1)
+      );
+
+      const querySnapshot = await getDocs(q);
+      // TODO: hide prompt
+
+      if (querySnapshot.empty) {
+        //TODO: show prompt that drivers not available
+      } else {
+        console.log("Empty: ", querySnapshot.empty);
+        querySnapshot.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          console.log(doc.id, " => ", doc.data());
+        });
+      }
+    }
+  }
+
+  function addMetersToLatitude(latitude, meters) {
+    // One degree of latitude is approximately 111,320 meters
+    const metersPerDegree = 111320;
+
+    // Calculate the change in latitude (in degrees)
+    const deltaLatitude = meters / metersPerDegree;
+
+    // Add the change in latitude to the original latitude
+    const newLatitude = latitude + deltaLatitude;
+
+    return newLatitude;
+  }
 
   return (
     <View style={styles.outerContainer}>
-      {/* <Text>Here is my MapScreen...</Text> */}
       <View style={tw`h-1/3`}>
         <MapView
           style={styles.map}
@@ -52,19 +113,35 @@ const TravellerScreen = ({ route }) => {
             longitudeDelta: 0.05,
           }}
         >
-          <Marker
-            key={1}
-            coordinate={{
-              latitude: location.latitude,
-              longitude: location.longitude,
-            }}
-            title={`Passenger`}
-          />
+          {startLocation?.latitude && startLocation?.longitude ? (
+            <Marker
+              key={1}
+              coordinate={{
+                latitude: startLocation?.latitude,
+                longitude: startLocation?.longitude,
+              }}
+              title={`Start Location`}
+            />
+          ) : null}
+
+          {endLocation?.latitude && endLocation?.longitude ? (
+            <Marker
+              key={2}
+              coordinate={{
+                latitude: endLocation?.latitude,
+                longitude: endLocation?.longitude,
+              }}
+              title={`End Location`}
+            />
+          ) : null}
         </MapView>
       </View>
 
       <View style={tw`h-2/3`}>
-        <NavigateCard />
+        <NavigateCard
+          setStartLocation={setStartLocation}
+          setEndLocation={setEndLocation}
+        />
       </View>
     </View>
   );
