@@ -69,7 +69,6 @@ const DriverScreen = ({ route }) => {
 
   const handleAcceptRide = () => {
     // TODO: Validation logic
-
     setRideState(2);
   };
 
