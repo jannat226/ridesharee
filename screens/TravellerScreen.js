@@ -29,6 +29,7 @@ const TravellerScreen = ({ route }) => {
 
   useEffect(() => {
     Location.getCurrentPositionAsync({}).then((res) => {
+      console.log(res.coords.latitude);
       setLocation({
         latitude: res.coords.latitude,
         longitude: res.coords.longitude,
@@ -59,22 +60,31 @@ const TravellerScreen = ({ route }) => {
         where("latitude", ">", new_lat_smaller),
         limit(1)
       );
-
+      console.log(
+        "new_lat_smaller,new_lat_greater",
+        new_lat_smaller,
+        new_lat_greater
+      );
       const querySnapshot = await getDocs(q);
       // TODO: hide prompt
-      setRideState({
-        state: 4,
-        message: "",
-      });
-      console.log("reached here in traveller screen after query");
 
+      console.log("reached here in traveller screen after query");
+      console.log("Empty: ", querySnapshot.empty);
       if (querySnapshot.empty) {
         //TODO: show prompt that drivers not available
+        setRideState({
+          state: 4,
+          message: "No Drivers Found",
+        });
       } else {
         console.log("Empty: ", querySnapshot.empty);
         querySnapshot.forEach((doc) => {
           // doc.data() is never undefined for query doc snapshots
-          console.log(doc.id, " => ", doc.data());
+          console.log(doc.id, " => ", doc.data().vehicleNumber);
+          setRideState({
+            state: 4,
+            message: `Driver found:${doc.data().vehicleNumber}`,
+          });
         });
       }
     }
@@ -148,7 +158,11 @@ const TravellerScreen = ({ route }) => {
       <Modal
         animationType="slide"
         transparent={true}
-        visible={rideState.state === 2 || rideState.state === 3}
+        visible={
+          rideState.state === 2 ||
+          rideState.state === 3 ||
+          rideState.state === 4
+        }
       >
         <View style={styles.modalContainer}>
           <View style={styles.dialogBox}>
