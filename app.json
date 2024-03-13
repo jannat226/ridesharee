@@ -21,7 +21,14 @@
           "locationAlwaysAndWhenInUsePermission": "Allow Ride Share to use your location.",
           "isIosBackgroundLocationEnabled" : true,
           "isAndroidBackgroundLocationEnabled" : true
-        }
+        }        
+      ],[
+        [
+          "@rnmapbox/maps",
+          {
+            "RNMapboxMapsDownloadToken": "pk.eyJ1IjoiamFubmF0LWpjIiwiYSI6ImNsdHBwZmN3NjB3ZXcya3AzcmkyNWc5eWEifQ.Nfw_KnVNLgknwFovJ2a0bA"
+          }
+        ]
       ]
     ],
     "ios": {

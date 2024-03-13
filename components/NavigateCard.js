@@ -283,7 +283,7 @@ const NavigateCard = ({
           <View>
             <TextInput
               style={styles.input}
-              placeholder="Enter Your Location..."
+              placeholder="Christ University..."
               value={inputValue}
               onChangeText={handleInputChange}
             />
@@ -383,6 +383,7 @@ const styles = StyleSheet.create({
 });
 
 const locations = [
+  "CHRIST UNIVERSITY",
   "BTM LAYOUT",
   "JAYANAGAR",
   "SHANTI NAGAR",

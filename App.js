@@ -2,6 +2,7 @@ import { ActivityIndicator, StyleSheet, Text, View } from "react-native";
 import { Provider } from "react-redux";
 import { collection, addDoc } from "firebase/firestore";
 import * as Location from "expo-location";
+import MapboxGL from "@rnmapbox/maps";
 
 import { store } from "./store";
 import HomeScreen from "./screens/HomeScreen";
@@ -36,6 +37,10 @@ const auth = getAuth();
 export default function App() {
   const [user, setUser] = useState();
   useEffect(() => {
+    MapboxGL.setAccessToken(
+      "pk.eyJ1IjoiamFubmF0LWpjIiwiYSI6ImNsdHBwZmN3NjB3ZXcya3AzcmkyNWc5eWEifQ.Nfw_KnVNLgknwFovJ2a0bA"
+    );
+
     onAuthStateChanged(auth, (user) => {
       if (user) {
         setUser(user);
