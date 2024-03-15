@@ -1,10 +1,8 @@
-// FirebaseContext.js
 import { onAuthStateChanged } from 'firebase/auth';
-import React, { createContext, useEffect, useState } from 'react';
-import { ActivityIndicator } from 'react-native';
+import React, { createContext, useCallback, useEffect, useState } from 'react';
 import { auth, db } from '../config/firebaseConfig';
+import * as SplashScreen from 'expo-splash-screen';
 import { View } from 'react-native';
-import { Text } from 'react-native-elements';
 
 export const FirebaseContext = createContext();
 
@@ -19,21 +17,27 @@ export const FirebaseProvider = ({ children }) => {
                 setUser(null);
             }
         });
-
         return () => unsubscribe();
     }, []);
 
-    if (user === undefined)
-        return (
-            <View>
-                <ActivityIndicator size="large" color="#0000ff" />
-                <Text>Loading...</Text>
-            </View>
-        );
+    const onLayoutRootView = useCallback(async () => {
+        if (typeof (user) !== "undefined") {
+
+            await SplashScreen.hideAsync();
+        }
+    }, [user]);
+
+    if (typeof (user) === "undefined") {
+        return null;
+    }
 
     return (
         <FirebaseContext.Provider value={{ auth, user, db }}>
-            {children}
+            <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+                {children}
+            </View>
         </FirebaseContext.Provider>
     );
 };
+
+

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,43 +10,42 @@ import {
   TouchableOpacity,
   Alert,
 } from "react-native";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { useNavigation } from "@react-navigation/native";
+import { FirebaseContext } from "../providers/FirebaseProvider";
 
-const SignupScreen = ({ route }) => {
-  const { auth } = route.params;
-
-  console.log(auth);
-
+const SignupScreen = () => {
   const [email, setEmail] = useState("");
   const [mobileNumber, setMobileNumber] = useState("");
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
   const navigation = useNavigation();
 
-  const handleUsernameChange = (text) => {
-    setUsername(text);
+  const { auth } = useContext(FirebaseContext);
+
+  const handleUsernameChange = (username) => {
+    setUsername(username);
   };
 
-  const handleEmailChange = (text) => {
-    setEmail(text);
+  const handleEmailChange = (email) => {
+    setEmail(email);
   };
 
-  const handleMobileNumberChange = (text) => {
-    setMobileNumber(text);
+  const handleMobileNumberChange = (mobileNumber) => {
+    setMobileNumber(mobileNumber);
   };
 
-  const handlePasswordChange = (text) => {
-    setPassword(text);
+  const handlePasswordChange = (password) => {
+    setPassword(password);
   };
 
-  const handleConfirmPasswordChange = (text) => {
-    setConfirmPassword(text);
+  const handleConfirmPasswordChange = (confirmPassword) => {
+    setConfirmPassword(confirmPassword);
   };
 
   const handleSubmit = () => {
-    // Basic validation
     if (!username || !email || !mobileNumber || !password || !confirmPassword) {
       Alert.alert("Error", "All fields are required");
       return;
@@ -56,15 +55,12 @@ const SignupScreen = ({ route }) => {
       Alert.alert("Error", "Passwords do not match");
       return;
     }
-    const { auth } = route.params;
+
     createUserWithEmailAndPassword(auth, email, password)
       .then((userCredential) => {
-        // Signed up
+
         const user = userCredential.user;
-        console.log("User Signed Up");
-        navigation.navigate("HomeScreen", {
-          user,
-        });
+        navigation.navigate("Home");
       })
       .catch((error) => {
         const errorCode = error.code;
@@ -82,8 +78,6 @@ const SignupScreen = ({ route }) => {
 
     // You can navigate to the home screen or perform other actions after sign-up
   };
-
-  console.log("this is ken , pearl n jhen", auth);
 
   return (
     <SafeAreaView style={styles.container}>

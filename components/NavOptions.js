@@ -1,3 +1,4 @@
+import React, { useContext } from "react";
 import {
   FlatList,
   StyleSheet,
@@ -6,11 +7,12 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
-import React from "react";
+
 import tw from "tailwind-react-native-classnames";
 import { Icon } from "react-native-elements";
 import { useNavigation } from "@react-navigation/native";
-import { getAuth } from "firebase/auth";
+
+import { FirebaseContext } from "../providers/FirebaseProvider";
 
 const data = [
   {
@@ -28,7 +30,8 @@ const data = [
 ];
 const NavOptions = () => {
   const navigation = useNavigation();
-  const auth = getAuth();
+  const { auth } = useContext(FirebaseContext);
+
   return (
     <FlatList
       data={data}
@@ -37,7 +40,7 @@ const NavOptions = () => {
       renderItem={({ item }) => (
         <TouchableOpacity
           onPress={() => {
-            if (auth.currentUser == null) navigation.navigate("LoginScreen");
+            if (auth.currentUser == null) navigation.navigate("Login");
             else navigation.navigate(item.screen);
           }}
           key={() => item.id}

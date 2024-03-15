@@ -11,6 +11,7 @@ import {
   Modal,
   Button,
   FlatList,
+  ToastAndroid,
 } from "react-native";
 import NavOptions from "../components/NavOptions";
 import NavFavourites from "../components/NavFavourites";
@@ -34,8 +35,8 @@ const HomeScreen = () => {
   const handleLogout = () => {
     signOut(auth)
       .then(() => {
-        // Sign-out successful.
-        navigation.navigate("LoginScreen");
+        // Show a toast message
+        ToastAndroid.show("User Logged Out", ToastAndroid.SHORT);
       })
       .catch((error) => {
         // An error happened.
@@ -78,7 +79,7 @@ const HomeScreen = () => {
 
           <TouchableOpacity
             onPress={() => {
-              if (auth.currentUser == null) navigation.navigate("LoginScreen");
+              if (auth.currentUser == null) navigation.navigate("Login");
               else setShowPopover(true);
             }}
           >
@@ -120,8 +121,11 @@ const HomeScreen = () => {
                 <AntDesign name="close" size={24} color="black" />
               </TouchableOpacity>
             </View>
-            <Text style={styles.textContent}>{`User: ${user.email}`}</Text>
-            <TouchableOpacity onPress={() => { }} style={styles.logoutButton}>
+            <Text style={styles.textContent}>{`User: ${user?.email}`}</Text>
+            <TouchableOpacity onPress={() => { 
+              setShowPopover(false);
+              handleLogout();
+            }} style={styles.logoutButton}>
               <Text style={styles.logoutButtonText}>Logout</Text>
             </TouchableOpacity>
           </View>

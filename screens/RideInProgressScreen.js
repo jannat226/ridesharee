@@ -13,7 +13,7 @@ const RideInProgressScreen = () => {
   };
 
   const handleCancel = () => {
-    navigation.navigate("HomeScreen");
+    navigation.navigate("Home");
   };
   return (
     <View style={styles.container}>

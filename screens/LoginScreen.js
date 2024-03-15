@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   Alert,
   ActivityIndicator,
+  ToastAndroid,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -30,15 +31,18 @@ const LoginScreen = () => {
   };
 
   const handleLogin = () => {
+
+    if (!isEmailValid(username)) {
+      ToastAndroid.show('Invalid Email', ToastAndroid.SHORT);
+      return;
+    }
+
     setIsLoading({ visible: true, message: "Signing In" });
     signInWithEmailAndPassword(auth, username, password)
-      .then((userCredential) => {
-        const user = userCredential.user;
+      .then(() => {
         console.log("User Signed In");
         setIsLoading({ visible: false, message: "" });
-        navigation.navigate("HomeScreen", {
-          user,
-        });
+        navigation.navigate("Home");
       })
       .catch((e) => {
         setIsLoading({ visible: false, message: "" });
@@ -50,24 +54,10 @@ const LoginScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {isLoading.visible && (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#0000ff" />
-          <Text style={styles.loadingText}>Loading...</Text>
-        </View>
-      )}
       <View style={styles.borderContainer}>
         <Image
-          source={require("../assets/images/logo.jpeg")}
-          style={{
-            width: 100,
-            height: 90,
-            paddingLeft: 0,
-            marginLeft: 0,
-            marginTop: 10,
-            justifyContent: "center",
-            resizeMode: "cover",
-          }}
+          source={require("../assets/splash.png")}
+          style={styles.appIconImage}
         />
       </View>
       <View style={styles.formContainer}>
@@ -101,6 +91,12 @@ const LoginScreen = () => {
         >
           <Text style={styles.smallText}>Forgot Password</Text>
         </TouchableOpacity>
+        {isLoading.visible && (
+        <View style={styles.loadingContainer}>
+          <ActivityIndicator size="large" color="#0000ff" />
+          <Text style={styles.loadingText}>Loading...</Text>
+        </View>
+      )}
       </View>
     </SafeAreaView>
   );
@@ -140,6 +136,15 @@ const styles = StyleSheet.create({
     paddingRight: 10,
     marginTop: 10,
     width: width - 60,
+  },
+  appIconImage: {
+    width: 100,
+    height: 100,
+    paddingLeft: 0,
+    marginLeft: 0,
+    marginTop: 10,
+    justifyContent: "center",
+    resizeMode: "cover",
   },
   loginButton: {
     backgroundColor: "green",
@@ -185,15 +190,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: '50%',
     left: '50%',
-    marginLeft: -50,
-    marginTop: -50,
-    flexDirection: 'row',
+    transform: [{ translateX: -70 }, { translateY: -50 }],
+    flexDirection: 'column', // Change to column to center items vertically
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
     padding: 20,
     borderRadius: 10,
-  },
+  },  
   loadingText: {
     marginLeft: 10,
     fontSize: 18,

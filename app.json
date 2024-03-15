@@ -4,7 +4,7 @@
     "slug": "ChristRideSharing",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/images/logo.jpeg",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/splash.png",
@@ -15,16 +15,28 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.christuniversity.ridesharingapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.christuniversity.ridesharingapp",
+      "config": {
+        "googleMaps": {
+          "apiKey": "AIzaSyCJs8kIoZ2Yj24YSu0xetktg_9PB2b-F4Y"
+        }
       }
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "09d4afb1-ec85-4af0-9bc3-6ed019a774f5"
+      }
     }
   }
 }

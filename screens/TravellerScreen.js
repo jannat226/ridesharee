@@ -193,6 +193,18 @@ const TravellerScreen = () => {
             longitudeDelta: 0.05,
           }}
         >
+
+          {location.latitude != 0.0 && (
+            <Marker
+              key={1}
+              coordinate={{
+                latitude: location.latitude,
+                longitude: location.longitude,
+              }}
+              title={`Start Location`}
+            />
+          )}
+
           {startLocation?.latitude && startLocation?.longitude ? (
             <Marker
               key={1}
