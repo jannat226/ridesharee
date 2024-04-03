@@ -444,7 +444,7 @@ const NavigateCard = ({
   const [vehicleType, setVehicleType] = useState(""); // State to store the selected vehicle type
   const navigation = useNavigation();
   const [PassangerCount, setPassangerCount] = useState(null);
-  const [timing, setTiming] = useState(null);
+  const [timing, setTiming] = useState("");
   const handleInputChange = (text) => {
     setInputValue(text);
   };
@@ -474,12 +474,12 @@ const NavigateCard = ({
       filterValue === ""
         ? []
         : options
-            .filter(
-              (option) =>
-                option.toLowerCase() != filterValue.toLowerCase() &&
-                option.toLowerCase().includes(filterValue.toLowerCase())
-            )
-            .slice(0, 5);
+          .filter(
+            (option) =>
+              option.toLowerCase() != filterValue.toLowerCase() &&
+              option.toLowerCase().includes(filterValue.toLowerCase())
+          )
+          .slice(0, 5);
     return (
       <FlatList
         data={res}
@@ -502,9 +502,9 @@ const NavigateCard = ({
               <Text>Choose your timing</Text>
               <SelectDropdown
                 data={options}
-                onSelect={(selectedItem, index) => setTiming(selectedItem)}
-                buttonTextAfterSelection={(selectedItem, index) => selectedItem}
-                rowTextForSelection={(item, index) => item}
+                onSelect={(selectedItem, _) => setTiming(selectedItem)}
+                buttonTextAfterSelection={(selectedItem, _) => selectedItem}
+                rowTextForSelection={(item, _) => item}
                 renderCustomizedButton={({
                   selectedItem,
                   defaultText,
@@ -536,7 +536,7 @@ const NavigateCard = ({
             <TextInput
               style={styles.input}
               placeholder="Enter Your Destination..."
-              value={timing === options[0] ? "Christ University" : inputValue}
+              value={timing === options[0] ? "Christ University" : inputValue2}
               onChangeText={handleInputChange2}
             />
 
