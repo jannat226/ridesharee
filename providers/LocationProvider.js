@@ -11,7 +11,7 @@ export const LocationProvider = ({ children }) => {
     });
 
     useEffect(() => {
-        const locationSubscription = Location.watchPositionAsync(
+        Location.watchPositionAsync(
             { accuracy: Location.Accuracy.High },
             (loc) => {
                 setLocation({
@@ -33,8 +33,6 @@ export const LocationProvider = ({ children }) => {
                 console.log("Permission granted");
             }
         })();
-
-        return () => locationSubscription.remove();
     }, []);
 
     return (

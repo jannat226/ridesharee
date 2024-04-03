@@ -13,6 +13,7 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { collection, getDocs, limit, query, where } from "firebase/firestore";
 import { FirebaseContext } from "../providers/FirebaseProvider";
+import { useNavigation } from "@react-navigation/native";
 
 // distance from the user
 const distanceDelta = 500;
@@ -27,6 +28,7 @@ const TravellerScreen = () => {
     message: "",
   });
 
+  const navigation = useNavigation();
   const { db } = useContext(FirebaseContext);
 
   useEffect(() => {
@@ -118,7 +120,23 @@ const TravellerScreen = () => {
     return null;
   }
 
-  async function getRoute(start, end) {
+  async function getRoute(start, end, vehicleType, timing) {
+    console.log("Called getRoute 4 args", start, end);
+    const start_coords = await getLatLong(start);
+    const end_coords = await getLatLong(end);
+
+    console.log(start_coords, end_coords);
+
+    navigation.navigate("Ride Options", {
+      start: start_coords,
+      end: end_coords,
+      vehicleType: vehicleType,
+      timing: timing,
+    })
+  }
+
+  async function getRoutex(start, end) {
+    console.log("Called getRoute 2 args");
     if (start == null || end == null) return;
     setRideState(() => ({
       message: "Searching for nearby Drivers... Please Wait",
@@ -229,9 +247,6 @@ const TravellerScreen = () => {
 
       <View style={tw`h-2/3`}>
         <NavigateCard
-          setStartLocation={setStartLocation}
-          setEndLocation={setEndLocation}
-          setRideState={setRideState}
           getRoute={getRoute}
         />
       </View>

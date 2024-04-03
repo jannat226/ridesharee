@@ -222,7 +222,7 @@
 //   },
 // });
 
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
   SafeAreaView,
   StyleSheet,
@@ -235,6 +235,7 @@ import tw from "tailwind-react-native-classnames";
 import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native";
 import ImagePicker from "react-native-image-picker";
+import { FirebaseContext } from "../providers/FirebaseProvider";
 
 const data = [
   {
@@ -264,8 +265,15 @@ const data = [
   // ... (other data entries)
 ];
 
-const RideOptionsCard = ({ navigation }) => {
+const RideOptionsCard = ({ route }) => {
   const [selected, setSelected] = useState(null);
+
+  const navigation = useNavigation();
+  const { db } = useContext(FirebaseContext);
+
+  const { start, end, vehicleType, timing } = route.params;
+
+  console.log(start, end, vehicleType, timing)
 
   const handleBook = (item) => {
     // Set the selected item
@@ -300,6 +308,62 @@ const RideOptionsCard = ({ navigation }) => {
       }
     });
   };
+
+
+  async function getNearbyDrivers() {
+    console.log("reached here");
+
+    if (startLocation != null && endLocation != null) {
+      const driversRef = collection(db, "drivers");
+      const new_lat_greater = addMetersToLatitude(
+        startLocation.latitude,
+        distanceDelta
+      );
+      const new_lat_smaller = addMetersToLatitude(
+        startLocation.latitude,
+        -1 * distanceDelta
+      );
+
+      const q = query(
+        driversRef,
+        where("latitude", "<", new_lat_greater),
+        where("latitude", ">", new_lat_smaller),
+        limit(1)
+      );
+      console.log(
+        "new_lat_smaller,new_lat_greater",
+        new_lat_smaller,
+        new_lat_greater
+      );
+      const querySnapshot = await getDocs(q);
+      // TODO: hide prompt
+
+      console.log("reached here in traveller screen after query");
+      console.log("Empty: ", querySnapshot.empty);
+      if (querySnapshot.empty) {
+        //TODO: show prompt that drivers not available
+        setRideState({
+          state: 4,
+          message: "No Drivers Found",
+        });
+      } else {
+        console.log("Empty: ", querySnapshot.empty);
+        querySnapshot.forEach((doc) => {
+          // doc.data() is never undefined for query doc snapshots
+          console.log(doc.id, " => ", doc.data().vehicleNumber);
+          setRideState({
+            state: 4,
+            message: `Driver found:${doc.data().vehicleNumber}`,
+          });
+        });
+      }
+    }
+  }
+
+
+  useEffect(() => {
+    getNearbyDrivers();
+  }, []);
 
   return (
     <SafeAreaView>

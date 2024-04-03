@@ -71,7 +71,7 @@ export default function App() {
                   component={DriverScreen}
                 />
                 <Stack.Screen
-                  name="RideOptionsCard"
+                  name="Ride Options"
                   component={RideOptionsCard}
                 />
                 <Stack.Screen

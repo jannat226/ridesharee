@@ -434,16 +434,11 @@ import SelectDropdown from "react-native-select-dropdown";
 const options = ["Morning", "Evening"];
 const optionsCount = ["1", "2", "3"];
 const NavigateCard = ({
-  setStartLocation,
-  setEndLocation,
-  setRideState,
   getRoute,
 }) => {
-  const [inputValue, setInputValue] = useState("");
-  const [inputValue2, setInputValue2] = useState("");
+  const [startLocationValue, setInputValue] = useState("");
+  const [endLocationValue, setInputValue2] = useState("");
   const [vehicleType, setVehicleType] = useState(""); // State to store the selected vehicle type
-  const navigation = useNavigation();
-  const [PassangerCount, setPassangerCount] = useState(null);
   const [timing, setTiming] = useState("");
   const handleInputChange = (text) => {
     setInputValue(text);
@@ -461,12 +456,12 @@ const NavigateCard = ({
     } else if (!vehicleType) {
       alert("Please select a vehicle type");
     } else if (
-      (timing == options[0] && inputValue.trim() === "") ||
-      (timing == options[1] && inputValue2.trim() === "")
+      (timing == options[0] && startLocationValue.trim() === "") ||
+      (timing == options[1] && endLocationValue.trim() === "")
     ) {
       alert("Please enter both your location and destination.");
-    } else {
-      getRoute(inputValue, inputValue2);
+    } else {      
+      getRoute(timing == "Evening" ? "Christ University" : startLocationValue, timing == "Evening" ? endLocationValue : "Christ University", vehicleType, timing);
     }
   };
   const AvailableOptions = ({ options, onSelect, filterValue }) => {
@@ -525,24 +520,24 @@ const NavigateCard = ({
             <TextInput
               style={styles.input}
               placeholder="Christ University..."
-              value={timing === options[1] ? "Christ University" : inputValue}
+              value={timing === options[1] ? "Christ University" : startLocationValue}
               onChangeText={handleInputChange}
             />
             <AvailableOptions
               options={locations}
-              filterValue={inputValue}
+              filterValue={startLocationValue}
               onSelect={setInputValue}
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Your Destination..."
-              value={timing === options[0] ? "Christ University" : inputValue2}
+              value={timing === options[0] ? "Christ University" : endLocationValue}
               onChangeText={handleInputChange2}
             />
 
             <AvailableOptions
               options={locations}
-              filterValue={inputValue2}
+              filterValue={endLocationValue}
               onSelect={setInputValue2}
             />
             {/* <TextInput
