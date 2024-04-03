@@ -13,6 +13,7 @@ import MapView, { Marker } from "react-native-maps";
 import * as Location from "expo-location";
 import { doc, setDoc, Timestamp, updateDoc } from "firebase/firestore";
 import { FirebaseContext } from "../providers/FirebaseProvider";
+import { Icon } from "react-native-elements";
 
 const options = ["two-wheeler", "four-wheeler"];
 
@@ -22,12 +23,12 @@ const DriverScreen = () => {
     longitude: 0.0,
     timestamp: 0,
   });
-  const [passengerCount, setPassengerCount] = useState("");
+
   const [vehicleNumber, setVehicleNumber] = useState("");
   const [rideState, setRideState] = useState(0);
   const [vehicleType, setVehicleType] = useState(null);
 
-  const { db } = useContext(FirebaseContext);
+  const { db, user } = useContext(FirebaseContext);
 
   useEffect(() => {
     let subscription;
@@ -54,10 +55,9 @@ const DriverScreen = () => {
 
   useEffect(() => {
     if (rideState === 2) {
-      setDoc(doc(db, "drivers", userName), {
+      setDoc(doc(db, "drivers", user.email), {
         ...location,
         state: "accepting",
-        passengerCount,
         vehicleNumber,
         vehicleType,
       });
@@ -65,7 +65,7 @@ const DriverScreen = () => {
   }, [location, db, rideState]);
 
   const handleAcceptRide = () => {
-    if (!passengerCount || !vehicleNumber || !vehicleType) {
+    if (!vehicleNumber || !vehicleType) {
       alert("Please fill in all fields.");
       return;
     }
@@ -74,10 +74,13 @@ const DriverScreen = () => {
 
   const handleCancelRide = () => {
     setRideState(0);
-    updateDoc(doc(db, "drivers", userName), {
+    updateDoc(doc(db, "drivers", user.email), {
       ...location,
       state: "not-accepting",
     });
+  };
+  const handleVehicleType = (type) => {
+    setVehicleType(type); // Set the selected vehicle type
   };
 
   const placeholder = {
@@ -130,23 +133,42 @@ const DriverScreen = () => {
         </View>
         <View style={styles.inputContainer}>
           <Text style={styles.title}>Accept Ride</Text>
-          <Text style={styles.label}>
-            Enter the number of passengers you are willing to accept:
-          </Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Number of Passengers"
-            keyboardType="numeric"
-            value={passengerCount}
-            onChangeText={(text) => setPassengerCount(text)}
-          />
+          <Text style={styles.label}>Enter Vehicle Number:</Text>
+
           <TextInput
             style={styles.input}
             placeholder="Enter Your Vehicle Number"
             value={vehicleNumber}
             onChangeText={(text) => setVehicleNumber(text)}
           />
-          <SelectDropdown
+          <View style={styles.vehicleTypeContainer}>
+            <TouchableOpacity
+              style={[
+                styles.vehicleTypeButton,
+                vehicleType === "four-wheeler" && styles.selectedButton,
+              ]}
+              onPress={() => handleVehicleType("four-wheeler")}
+            >
+              <Icon name="car" type="font-awesome" color="white" size={16} />
+              <Text style={styles.vehicleTypeButtonText}>4-wheeler</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[
+                styles.vehicleTypeButton,
+                vehicleType === "two-wheeler" && styles.selectedButton,
+              ]}
+              onPress={() => handleVehicleType("two-wheeler")}
+            >
+              <Icon
+                name="bicycle"
+                type="font-awesome"
+                color="white"
+                size={16}
+              />
+              <Text style={styles.vehicleTypeButtonText}>2-wheeler</Text>
+            </TouchableOpacity>
+          </View>
+          {/* <SelectDropdown
             data={options}
             onSelect={(selectedItem, index) => setVehicleType(selectedItem)}
             buttonTextAfterSelection={(selectedItem, index) => selectedItem}
@@ -162,7 +184,7 @@ const DriverScreen = () => {
                 </Text>
               </TouchableOpacity>
             )}
-          />
+          /> */}
           <Button
             title="Accept Ride"
             onPress={handleAcceptRide}
@@ -215,6 +237,18 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     marginBottom: 20,
   },
+  vehicleTypeButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "black",
+    paddingHorizontal: 15,
+    paddingVertical: 10,
+    borderRadius: 20,
+  },
+  vehicleTypeButtonText: {
+    color: "white",
+    marginLeft: 5,
+  },
   dropdownButton: {
     height: 40,
     borderColor: "gray",
@@ -240,6 +274,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     alignItems: "center",
   },
+  vehicleTypeContainer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginTop: 10,
+  },
+  selectedButton: {
+    backgroundColor: "green", // Example color to indicate selection
+  },
   dialogText: {
     fontSize: 18,
     marginBottom: 20,
@@ -249,6 +291,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 5,
   },
+
   buttonText: {
     color: "white",
     fontWeight: "bold",

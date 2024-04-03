@@ -29,7 +29,6 @@ const TravellerScreen = () => {
 
   const { db } = useContext(FirebaseContext);
 
-
   useEffect(() => {
     Location.getCurrentPositionAsync({}).then((res) => {
       console.log(res.coords.latitude);
@@ -193,7 +192,6 @@ const TravellerScreen = () => {
             longitudeDelta: 0.05,
           }}
         >
-
           {location.latitude != 0.0 && (
             <Marker
               key={1}
