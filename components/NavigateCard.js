@@ -461,8 +461,8 @@ const NavigateCard = ({
     } else if (!vehicleType) {
       alert("Please select a vehicle type");
     } else if (
-      (timing == options[0] && inputValue2.trim() === "") ||
-      (timing == options[0] && inputValue.trim() === "")
+      (timing == options[0] && inputValue.trim() === "") ||
+      (timing == options[1] && inputValue2.trim() === "")
     ) {
       alert("Please enter both your location and destination.");
     } else {
@@ -585,7 +585,7 @@ const NavigateCard = ({
         <View
           style={tw`flex-row bg-white justify-evenly py-2 mt-auto border-t border-gray-100`}
         >
-          <Button title="Click me" onPress={validate} />
+          <Button title="Search Rides" onPress={validate} />
         </View>
       </View>
     </SafeAreaView>
