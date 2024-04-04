@@ -236,7 +236,8 @@ import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native";
 import ImagePicker from "react-native-image-picker";
 import { FirebaseContext } from "../providers/FirebaseProvider";
-
+import { collection, getDocs, limit, query, where } from "firebase/firestore";
+const distanceDelta = 500;
 const data = [
   {
     id: "Car-123",
@@ -273,7 +274,7 @@ const RideOptionsCard = ({ route }) => {
 
   const { start, end, vehicleType, timing } = route.params;
 
-  console.log(start, end, vehicleType, timing)
+  console.log(start, end, vehicleType, timing);
 
   const handleBook = (item) => {
     // Set the selected item
@@ -282,7 +283,18 @@ const RideOptionsCard = ({ route }) => {
     // Navigate to LiveScreen and pass selected item data
     navigation.navigate("LiveScreen", { selected });
   };
+  function addMetersToLatitude(latitude, meters) {
+    // One degree of latitude is approximately 111,320 meters
+    const metersPerDegree = 111320;
 
+    // Calculate the change in latitude (in degrees)
+    const deltaLatitude = meters / metersPerDegree;
+
+    // Add the change in latitude to the original latitude
+    const newLatitude = latitude + deltaLatitude;
+
+    return newLatitude;
+  }
   const handleImagePicker = (item) => {
     const options = {
       title: "Select Image",
@@ -309,22 +321,24 @@ const RideOptionsCard = ({ route }) => {
     });
   };
 
-
   async function getNearbyDrivers() {
     console.log("reached here", start != null, end != null, end);
 
     if (start != null && end != null) {
-      console.log("start and end are not null")
+      console.log("start and end are not null");
       const driversRef = collection(db, "drivers");
-      const new_lat_greater = addMetersToLatitude(
-        start.lat,
-        distanceDelta
-      );
+      console.log("flag after start and end are not null");
+      const new_lat_greater = addMetersToLatitude(start.lat, distanceDelta);
       const new_lat_smaller = addMetersToLatitude(
         start.lat,
         -1 * distanceDelta
       );
-      console.log("Greater Altitude: ", new_lat_greater, "Smaller Altitude: ", new_lat_smaller)
+      console.log(
+        "Greater Altitude: ",
+        new_lat_greater,
+        "Smaller Altitude: ",
+        new_lat_smaller
+      );
       const q = query(
         driversRef,
         where("latitude", "<", new_lat_greater),
@@ -358,14 +372,13 @@ const RideOptionsCard = ({ route }) => {
           });
         });
       }
-    }else{
-      console.log("Start or end is null")
+    } else {
+      console.log("Start or end is null");
     }
   }
 
-
   useEffect(() => {
-    console.log("Inside useEffect")
+    console.log("Inside useEffect");
     getNearbyDrivers();
   }, []);
 
