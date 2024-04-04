@@ -436,20 +436,24 @@ const optionsCount = ["1", "2", "3"];
 const NavigateCard = ({
   getRoute,
 }) => {
-  const [startLocationValue, setInputValue] = useState("");
-  const [endLocationValue, setInputValue2] = useState("");
+  const [startLocationValue, setStartLocationValue] = useState("");
+  const [endLocationValue, setEndLocationValue] = useState("");
   const [vehicleType, setVehicleType] = useState(""); // State to store the selected vehicle type
   const [timing, setTiming] = useState("");
-  const handleInputChange = (text) => {
-    setInputValue(text);
-  };
-  const handleInputChange2 = (text) => {
-    setInputValue2(text);
+
+  const handleStartLocationChange = (text) => {
+    setStartLocationValue(text);
   };
 
-  const handleVehicleType = (type) => {
-    setVehicleType(type); // Set the selected vehicle type
+  const handleEndLocationChange = (text) => {
+    console.log("Text inside destination change: ",text)
+    setEndLocationValue(text);
   };
+
+  const handleVehicleTypeChange = (type) => {
+    setVehicleType(type);
+  };
+
   const validate = () => {
     if (!timing) {
       alert("Please select timing");
@@ -461,10 +465,35 @@ const NavigateCard = ({
     ) {
       alert("Please enter both your location and destination.");
     } else {      
+      console.log("before getRoute", endLocationValue)
       getRoute(timing == "Evening" ? "Christ University" : startLocationValue, timing == "Evening" ? endLocationValue : "Christ University", vehicleType, timing);
     }
   };
-  const AvailableOptions = ({ options, onSelect, filterValue }) => {
+  const AvailableOptionsForStart = ({ options, onSelect, filterValue }) => {
+    const res =
+      filterValue === ""
+        ? []
+        : options
+          .filter(
+            (option) =>
+              option.toLowerCase() != filterValue.toLowerCase() &&
+              option.toLowerCase().includes(filterValue.toLowerCase())
+          )
+          .slice(0, 5);
+    return (
+      <FlatList
+        data={res}
+        renderItem={({ item }) => (
+          <TouchableOpacity onPress={() => onSelect(item)}>
+            <Text style={styles.option}>{item}</Text>
+          </TouchableOpacity>
+        )}
+        keyExtractor={(_item, index) => index.toString()}
+      />
+    );
+  };
+
+  const AvailableOptionsForEnd = ({ options, onSelect, filterValue }) => {
     const res =
       filterValue === ""
         ? []
@@ -521,31 +550,25 @@ const NavigateCard = ({
               style={styles.input}
               placeholder="Christ University..."
               value={timing === options[1] ? "Christ University" : startLocationValue}
-              onChangeText={handleInputChange}
+              onChangeText={handleStartLocationChange}
             />
-            <AvailableOptions
+            <AvailableOptionsForStart
               options={locations}
               filterValue={startLocationValue}
-              onSelect={setInputValue}
+              onSelect={handleStartLocationChange}
             />
             <TextInput
               style={styles.input}
               placeholder="Enter Your Destination..."
               value={timing === options[0] ? "Christ University" : endLocationValue}
-              onChangeText={handleInputChange2}
+              onChangeText={handleEndLocationChange}
             />
 
-            <AvailableOptions
+            <AvailableOptionsForEnd
               options={locations}
               filterValue={endLocationValue}
-              onSelect={setInputValue2}
+              onSelect={handleEndLocationChange}
             />
-            {/* <TextInput
-              style={styles.input}
-              placeholder="Enter Number of passengers"
-              value={inputValue2}
-              onChangeText={handleInputChange2}
-            /> */}
 
             <View style={styles.vehicleTypeContainer}>
               <TouchableOpacity
@@ -553,7 +576,7 @@ const NavigateCard = ({
                   styles.vehicleTypeButton,
                   vehicleType === "four-wheeler" && styles.selectedButton,
                 ]}
-                onPress={() => handleVehicleType("four-wheeler")}
+                onPress={() => handleVehicleTypeChange("four-wheeler")}
               >
                 <Icon name="car" type="font-awesome" color="white" size={16} />
                 <Text style={styles.vehicleTypeButtonText}>4-wheeler</Text>
@@ -563,7 +586,7 @@ const NavigateCard = ({
                   styles.vehicleTypeButton,
                   vehicleType === "two-wheeler" && styles.selectedButton,
                 ]}
-                onPress={() => handleVehicleType("two-wheeler")}
+                onPress={() => handleVehicleTypeChange("two-wheeler")}
               >
                 <Icon
                   name="bicycle"

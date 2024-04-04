@@ -311,24 +311,25 @@ const RideOptionsCard = ({ route }) => {
 
 
   async function getNearbyDrivers() {
-    console.log("reached here");
+    console.log("reached here", start != null, end != null, end);
 
-    if (startLocation != null && endLocation != null) {
+    if (start != null && end != null) {
+      console.log("start and end are not null")
       const driversRef = collection(db, "drivers");
       const new_lat_greater = addMetersToLatitude(
-        startLocation.latitude,
+        start.lat,
         distanceDelta
       );
       const new_lat_smaller = addMetersToLatitude(
-        startLocation.latitude,
+        start.lat,
         -1 * distanceDelta
       );
-
+      console.log("Greater Altitude: ", new_lat_greater, "Smaller Altitude: ", new_lat_smaller)
       const q = query(
         driversRef,
         where("latitude", "<", new_lat_greater),
         where("latitude", ">", new_lat_smaller),
-        limit(1)
+        limit(3)
       );
       console.log(
         "new_lat_smaller,new_lat_greater",
@@ -357,11 +358,14 @@ const RideOptionsCard = ({ route }) => {
           });
         });
       }
+    }else{
+      console.log("Start or end is null")
     }
   }
 
 
   useEffect(() => {
+    console.log("Inside useEffect")
     getNearbyDrivers();
   }, []);
 

@@ -111,7 +111,9 @@ const TravellerScreen = () => {
   async function getLatLong(address) {
     const res = await fetch(
       `https://geocode.maps.co/search?q=${address}&api_key=65e2f7671a69c966166250vxha68cf2`
-    );
+    ).catch((err)=>{
+      console.log(err)
+    });
     if (res.ok) {
       const data = await res.json();
       if (Array.isArray(data)) return data[0];
@@ -125,7 +127,7 @@ const TravellerScreen = () => {
     const start_coords = await getLatLong(start);
     const end_coords = await getLatLong(end);
 
-    console.log(start_coords, end_coords);
+    
 
     navigation.navigate("Ride Options", {
       start: start_coords,
