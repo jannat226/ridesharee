@@ -111,8 +111,8 @@ const TravellerScreen = () => {
   async function getLatLong(address) {
     const res = await fetch(
       `https://geocode.maps.co/search?q=${address}&api_key=65e2f7671a69c966166250vxha68cf2`
-    ).catch((err)=>{
-      console.log(err)
+    ).catch((err) => {
+      console.log(err);
     });
     if (res.ok) {
       const data = await res.json();
@@ -125,16 +125,16 @@ const TravellerScreen = () => {
   async function getRoute(start, end, vehicleType, timing) {
     console.log("Called getRoute 4 args", start, end);
     const start_coords = await getLatLong(start);
+    // wait for 2 seconds
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     const end_coords = await getLatLong(end);
-
-    
 
     navigation.navigate("Ride Options", {
       start: start_coords,
       end: end_coords,
       vehicleType: vehicleType,
       timing: timing,
-    })
+    });
   }
 
   async function getRoutex(start, end) {
@@ -248,9 +248,7 @@ const TravellerScreen = () => {
       </View>
 
       <View style={tw`h-2/3`}>
-        <NavigateCard
-          getRoute={getRoute}
-        />
+        <NavigateCard getRoute={getRoute} />
       </View>
     </View>
   );

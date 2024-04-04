@@ -230,6 +230,7 @@ import {
   View,
   Image,
   TouchableOpacity,
+  Linking,
 } from "react-native";
 import tw from "tailwind-react-native-classnames";
 import { useNavigation } from "@react-navigation/native";
@@ -237,7 +238,7 @@ import { FlatList } from "react-native";
 import ImagePicker from "react-native-image-picker";
 import { FirebaseContext } from "../providers/FirebaseProvider";
 import { collection, getDocs, limit, query, where } from "firebase/firestore";
-const distanceDelta = 500;
+const distanceDelta = 10000;
 const data = [
   {
     id: "Car-123",
@@ -268,6 +269,7 @@ const data = [
 
 const RideOptionsCard = ({ route }) => {
   const [selected, setSelected] = useState(null);
+  const [drivers, setDrivers] = useState([]);
 
   const navigation = useNavigation();
   const { db } = useContext(FirebaseContext);
@@ -292,6 +294,12 @@ const RideOptionsCard = ({ route }) => {
 
     // Add the change in latitude to the original latitude
     const newLatitude = latitude + deltaLatitude;
+
+    console.log(newLatitude);
+
+    // round of newLatitude to nearest 6 digits
+    const roundedLatitude = Math.round(newLatitude * 1000000) / 1000000;
+    console.log(roundedLatitude);
 
     return newLatitude;
   }
@@ -321,6 +329,12 @@ const RideOptionsCard = ({ route }) => {
     });
   };
 
+  const openGoogleMaps = (latitude, longitude) => {
+    console.log("Open Google Maps");
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${latitude},${longitude}&travelmode=driving`;
+    Linking.openURL(url);
+  };
+
   async function getNearbyDrivers() {
     console.log("reached here", start != null, end != null, end);
 
@@ -328,49 +342,43 @@ const RideOptionsCard = ({ route }) => {
       console.log("start and end are not null");
       const driversRef = collection(db, "drivers");
       console.log("flag after start and end are not null");
-      const new_lat_greater = addMetersToLatitude(start.lat, distanceDelta);
-      const new_lat_smaller = addMetersToLatitude(
-        start.lat,
-        -1 * distanceDelta
-      );
+      // const new_lat_greater = addMetersToLatitude(start.lat, distanceDelta);
+      // const new_lat_smaller = addMetersToLatitude(
+      //   start.lat,
+      //   -1 * distanceDelta
+      // );
+      const new_lat_greater = parseFloat(start.lat) + 0.000005;
+      const new_lat_smaller = parseFloat(start.lat) - 0.000005;
       console.log(
-        "Greater Altitude: ",
-        new_lat_greater,
+        "Original Latitude: ",
+        start.lat,
         "Smaller Altitude: ",
-        new_lat_smaller
+        new_lat_smaller,
+        "Greater Altitude: ",
+        new_lat_greater
       );
       const q = query(
         driversRef,
         where("latitude", "<", new_lat_greater),
-        where("latitude", ">", new_lat_smaller),
+        where("latitude", ">=", new_lat_smaller),
         limit(3)
       );
-      console.log(
-        "new_lat_smaller,new_lat_greater",
-        new_lat_smaller,
-        new_lat_greater
-      );
+
       const querySnapshot = await getDocs(q);
       // TODO: hide prompt
 
-      console.log("reached here in traveller screen after query");
-      console.log("Empty: ", querySnapshot.empty);
       if (querySnapshot.empty) {
-        //TODO: show prompt that drivers not available
-        setRideState({
-          state: 4,
-          message: "No Drivers Found",
-        });
+        console.log("No snapshots");
       } else {
         console.log("Empty: ", querySnapshot.empty);
+        let driverarray = [];
         querySnapshot.forEach((doc) => {
-          // doc.data() is never undefined for query doc snapshots
           console.log(doc.id, " => ", doc.data().vehicleNumber);
-          setRideState({
-            state: 4,
-            message: `Driver found:${doc.data().vehicleNumber}`,
-          });
+          driverarray.push({ ...doc.data(), id: doc.id });
+          console.log(driverarray);
         });
+        console.log("Drivers: ", driverarray);
+        setDrivers(driverarray);
       }
     } else {
       console.log("Start or end is null");
@@ -386,25 +394,25 @@ const RideOptionsCard = ({ route }) => {
     <SafeAreaView>
       <View style={styles.container}>
         <FlatList
-          data={data}
-          keyExtractor={(item) => item.id}
+          data={drivers}
+          keyExtractor={(item) => item.vehicleNumber}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => handleBook(item)}
+              onPress={() => openGoogleMaps(item.latitude, item.longitude)}
               style={tw`flex-row justify-between items-center px-4 py-3 border-b border-gray-300`}
             >
               <View style={tw`flex-row items-center`}>
-                <TouchableOpacity onPress={() => handleImagePicker(item)}>
+                <TouchableOpacity onPress={() => {}}>
                   <Image
                     style={tw`w-16 h-16 rounded-full`}
-                    source={item.image}
+                    source={data[0].image}
                   />
                 </TouchableOpacity>
                 <View style={tw`ml-4`}>
-                  <Text style={tw`text-xl font-semibold`}>{item.location}</Text>
-                  <Text>{item.passengers} Passengers</Text>
-                  <Text>{item.multiplier}x Multiplier</Text>
-                  <Text>{item.charges}rs Charges</Text>
+                  {/* <Text style={tw`text-xl font-semibold`}>{item.location}</Text> */}
+                  <Text>{"Owner Email:\n" + item.id}</Text>
+                  <Text>Vehicle Type: {item.vehicleType} </Text>
+                  {/* <Text>{item.charges}rs Charges</Text> */}
                 </View>
               </View>
               <View style={styles.book}>
@@ -417,6 +425,37 @@ const RideOptionsCard = ({ route }) => {
     </SafeAreaView>
   );
 };
+
+{
+  /* <FlatList
+data={data}
+keyExtractor={(item) => item.id}
+renderItem={({ item }) => (
+  <TouchableOpacity
+    onPress={() => handleBook(item)}
+    style={tw`flex-row justify-between items-center px-4 py-3 border-b border-gray-300`}
+  >
+    <View style={tw`flex-row items-center`}>
+      <TouchableOpacity onPress={() => handleImagePicker(item)}>
+        <Image
+          style={tw`w-16 h-16 rounded-full`}
+          source={item.image}
+        />
+      </TouchableOpacity>
+      <View style={tw`ml-4`}>
+        <Text style={tw`text-xl font-semibold`}>{item.location}</Text>
+        <Text>{item.passengers} Passengers</Text>
+        <Text>{item.multiplier}x Multiplier</Text>
+        <Text>{item.charges}rs Charges</Text>
+      </View>
+    </View>
+    <View style={styles.book}>
+      <Text style={tw`text-xl`}>Book</Text>
+    </View>
+  </TouchableOpacity>
+)}
+/> */
+}
 
 export default RideOptionsCard;
 
