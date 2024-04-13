@@ -237,7 +237,15 @@ import { useNavigation } from "@react-navigation/native";
 import { FlatList } from "react-native";
 import ImagePicker from "react-native-image-picker";
 import { FirebaseContext } from "../providers/FirebaseProvider";
-import { collection, getDocs, limit, query, where } from "firebase/firestore";
+import {
+  collection,
+  doc,
+  getDocs,
+  limit,
+  query,
+  setDoc,
+  where,
+} from "firebase/firestore";
 const distanceDelta = 10000;
 const data = [
   {
@@ -272,7 +280,7 @@ const RideOptionsCard = ({ route }) => {
   const [drivers, setDrivers] = useState([]);
 
   const navigation = useNavigation();
-  const { db } = useContext(FirebaseContext);
+  const { db, user } = useContext(FirebaseContext);
 
   const { start, end, vehicleType, timing } = route.params;
 
@@ -390,6 +398,16 @@ const RideOptionsCard = ({ route }) => {
     getNearbyDrivers();
   }, []);
 
+  async function notifyDriver(someData) {
+    await setDoc(doc(db, `drivers/${someData.id}/travellers`, user.email), {
+      start,
+      end,
+      vehicleType,
+      timing,
+    });
+    // console.log(start, end, vehicleType, timing);
+  }
+
   return (
     <SafeAreaView>
       <View style={styles.container}>
@@ -398,7 +416,10 @@ const RideOptionsCard = ({ route }) => {
           keyExtractor={(item) => item.vehicleNumber}
           renderItem={({ item }) => (
             <TouchableOpacity
-              onPress={() => openGoogleMaps(item.latitude, item.longitude)}
+              onPress={() => {
+                notifyDriver(item);
+                // openGoogleMaps(item.latitude, item.longitude);
+              }}
               style={tw`flex-row justify-between items-center px-4 py-3 border-b border-gray-300`}
             >
               <View style={tw`flex-row items-center`}>
