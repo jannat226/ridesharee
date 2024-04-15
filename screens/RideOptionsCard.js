@@ -223,6 +223,7 @@
 // });
 
 import React, { useContext, useEffect, useState } from "react";
+import { runTransaction } from "firebase/firestore";
 import {
   SafeAreaView,
   StyleSheet,
@@ -246,7 +247,9 @@ import {
   setDoc,
   where,
 } from "firebase/firestore";
-const distanceDelta = 10000;
+
+const distanceDelta = 0.0005;
+
 const data = [
   {
     id: "Car-123",
@@ -282,9 +285,10 @@ const RideOptionsCard = ({ route }) => {
   const navigation = useNavigation();
   const { db, user } = useContext(FirebaseContext);
 
-  const { start, end, vehicleType, timing } = route.params;
+  const { start, end, vehicleType, timing, current } = route.params;
 
-  console.log(start, end, vehicleType, timing);
+  // console.log(start, end, vehicleType, timing, current);
+  console.log(start, "\n\n", end);
 
   const handleBook = (item) => {
     // Set the selected item
@@ -344,25 +348,24 @@ const RideOptionsCard = ({ route }) => {
   };
 
   async function getNearbyDrivers() {
-    console.log("reached here", start != null, end != null, end);
+    console.log(
+      "start Location is not null: ",
+      start != null,
+      ", End Location is not null: ",
+      end != null
+    );
 
     if (start != null && end != null) {
-      console.log("start and end are not null");
       const driversRef = collection(db, "drivers");
-      console.log("flag after start and end are not null");
-      // const new_lat_greater = addMetersToLatitude(start.lat, distanceDelta);
-      // const new_lat_smaller = addMetersToLatitude(
-      //   start.lat,
-      //   -1 * distanceDelta
-      // );
-      const new_lat_greater = parseFloat(start.lat) + 0.000005;
-      const new_lat_smaller = parseFloat(start.lat) - 0.000005;
+
+      const new_lat_greater = parseFloat(current.latitude) + distanceDelta;
+      const new_lat_smaller = parseFloat(current.latitude) - distanceDelta;
       console.log(
         "Original Latitude: ",
         start.lat,
-        "Smaller Altitude: ",
+        "Smaller Latitude: ",
         new_lat_smaller,
-        "Greater Altitude: ",
+        "Greater Latitude: ",
         new_lat_greater
       );
       const q = query(
@@ -394,18 +397,95 @@ const RideOptionsCard = ({ route }) => {
   }
 
   useEffect(() => {
-    console.log("Inside useEffect");
     getNearbyDrivers();
   }, []);
 
+  const checkAndAddDocument = async (someData) => {
+    try {
+      const result = await runTransaction(db, async (transaction) => {
+        console.log("Inside runTransaction", someData);
+        const collectionRef = collection(
+          db,
+          `drivers/${someData.id}/travellers`
+        );
+        const querySnapshot = await getDocs(collectionRef);
+
+        if (querySnapshot.empty) {
+          console.log("Collection is empty, adding document");
+          // If the collection is empty, add the document
+          await setDoc(
+            doc(db, `drivers/${someData.id}/travellers`, user.email),
+            {
+              ...someData,
+              id: user.email,
+              pickup_location: current.latitude,
+              start_latitude: start.lat,
+              end_latitude: end.lat,
+              start_longitude: start.lon,
+              end_longitude: end.lon,
+            }
+          );
+          return true; // Return true to indicate document was added
+        } else {
+          console.log("Collection is not empty, skipping document addition");
+          return false; // Return false to indicate document was not added
+        }
+      });
+
+      console.log(result);
+
+      // If result is false, show a pop-up message indicating no driver is available
+      if (!result) {
+        window.alert("Sorry! this  driver not available now");
+      } else {
+        openGoogleMaps(someData.latitude, someData.longitude);
+      }
+      return result;
+    } catch (err) {
+      console.log("Error Occurred: ", err);
+      // Show a pop-up message indicating an error occurred
+      window.alert("An error occurred. Please try again later.");
+      return null;
+    }
+  };
+
   async function notifyDriver(someData) {
-    await setDoc(doc(db, `drivers/${someData.id}/travellers`, user.email), {
-      start,
-      end,
-      vehicleType,
-      timing,
-    });
+    // await setDoc(doc(db, `drivers/${someData.id}/travellers`, user.email), {
+    //   start,
+    //   end,
+    //   vehicleType,
+    //   timing,
+    // });
     // console.log(start, end, vehicleType, timing);
+    checkAndAddDocument(someData);
+    // try {
+    //   await runTransaction(db, async (transaction) => {
+    //     // Reference to the collection
+    //     const collectionRef = db.collection("your_collection_name");
+
+    //     return transaction
+    //       .get(db.collection(`drivers/${someData.id}/travellers`))
+    //       .then((querySnapshot) => {
+    //         // Array to store documents
+    //         const documents = [];
+
+    //         console.log("size: " + querySnapshot.data.length);
+    //         // Loop through each document
+    //         querySnapshot.forEach((doc) => {
+    //           console.log(`${doc.id}`);
+    //           // Push document data into the array
+    //           // documents.push(doc.data());
+    //         });
+
+    //         // Return the array of documents
+    //         return documents;
+    //       });
+    //   });
+
+    //   console.log("Transaction successfully committed!");
+    // } catch (e) {
+    //   console.log("Transaction failed: ", e);
+    // }
   }
 
   return (
@@ -433,6 +513,10 @@ const RideOptionsCard = ({ route }) => {
                   {/* <Text style={tw`text-xl font-semibold`}>{item.location}</Text> */}
                   <Text>{"Owner Email:\n" + item.id}</Text>
                   <Text>Vehicle Type: {item.vehicleType} </Text>
+                  <Text>
+                    Ride Charges:{" ₹"}
+                    {calculateDistance(start.lat, start.lon, end.lat, end.lon)}
+                  </Text>
                   {/* <Text>{item.charges}rs Charges</Text> */}
                 </View>
               </View>
@@ -504,3 +588,28 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
 });
+
+function calculateDistance(lat1, lon1, lat2, lon2) {
+  const earthRadius = 6371; // Radius of the earth in kilometers
+  const dLat = deg2rad(lat2 - lat1);
+  const dLon = deg2rad(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(deg2rad(lat1)) *
+      Math.cos(deg2rad(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  const distance = earthRadius * c; // Distance in km
+  return calculatePrice(distance).toFixed(2);
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI / 180);
+}
+
+function calculatePrice(distance) {
+  const price = distance * 20;
+
+  return price;
+}

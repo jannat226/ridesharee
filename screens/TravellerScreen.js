@@ -19,8 +19,10 @@ import { useNavigation } from "@react-navigation/native";
 const distanceDelta = 500;
 
 const TravellerScreen = () => {
-  const [inputValue, setInputValue] = useState("");
-  const [location, setLocation] = useState({ latitude: 0.0, longitude: 0.0 });
+  const [currentLocation, setCurrentLocation] = useState({
+    latitude: 0.0,
+    longitude: 0.0,
+  });
   const [startLocation, setStartLocation] = useState({});
   const [endLocation, setEndLocation] = useState({});
   const [rideState, setRideState] = useState({
@@ -33,80 +35,13 @@ const TravellerScreen = () => {
 
   useEffect(() => {
     Location.getCurrentPositionAsync({}).then((res) => {
-      console.log(res.coords.latitude);
-      setLocation({
+      console.log(res.coords.latitude, res.coords.longitude);
+      setCurrentLocation({
         latitude: res.coords.latitude,
         longitude: res.coords.longitude,
       });
     });
   }, []);
-
-  async function getNearbyDrivers() {
-    console.log("reached here");
-
-    if (startLocation != null && endLocation != null) {
-      const driversRef = collection(db, "drivers");
-      const new_lat_greater = addMetersToLatitude(
-        startLocation.latitude,
-        distanceDelta
-      );
-      const new_lat_smaller = addMetersToLatitude(
-        startLocation.latitude,
-        -1 * distanceDelta
-      );
-
-      const q = query(
-        driversRef,
-        where("latitude", "<", new_lat_greater),
-        where("latitude", ">", new_lat_smaller),
-        limit(1)
-      );
-      console.log(
-        "new_lat_smaller,new_lat_greater",
-        new_lat_smaller,
-        new_lat_greater
-      );
-      const querySnapshot = await getDocs(q);
-      // TODO: hide prompt
-
-      console.log("reached here in traveller screen after query");
-      console.log("Empty: ", querySnapshot.empty);
-      if (querySnapshot.empty) {
-        //TODO: show prompt that drivers not available
-        setRideState({
-          state: 4,
-          message: "No Drivers Found",
-        });
-      } else {
-        console.log("Empty: ", querySnapshot.empty);
-        querySnapshot.forEach((doc) => {
-          // doc.data() is never undefined for query doc snapshots
-          console.log(doc.id, " => ", doc.data().vehicleNumber);
-          setRideState({
-            state: 4,
-            message: `Driver found:${doc.data().vehicleNumber}`,
-          });
-        });
-      }
-    }
-  }
-
-  function addMetersToLatitude(latitude, meters) {
-    // One degree of latitude is approximately 111,320 meters
-    const metersPerDegree = 111320;
-
-    // Calculate the change in latitude (in degrees)
-    const deltaLatitude = meters / metersPerDegree;
-
-    // Add the change in latitude to the original latitude
-    const newLatitude = latitude + deltaLatitude;
-
-    return newLatitude;
-  }
-
-  useEffect(() => {
-    if (rideState.state === 3) getNearbyDrivers();
-  }, [rideState]);
 
   async function getLatLong(address) {
     const res = await fetch(
@@ -123,53 +58,17 @@ const TravellerScreen = () => {
   }
 
   async function getRoute(start, end, vehicleType, timing) {
-    console.log("Called getRoute 4 args", start, end);
     const start_coords = await getLatLong(start);
-    // wait for 2 seconds
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for 2 seconds
     const end_coords = await getLatLong(end);
 
     navigation.navigate("Ride Options", {
       start: start_coords,
       end: end_coords,
+      current: currentLocation,
       vehicleType: vehicleType,
       timing: timing,
     });
-  }
-
-  async function getRoutex(start, end) {
-    console.log("Called getRoute 2 args");
-    if (start == null || end == null) return;
-    setRideState(() => ({
-      message: "Searching for nearby Drivers... Please Wait",
-      state: 2,
-    }));
-
-    const start_loc = await getLatLong(start);
-    await new Promise((resolve) => setTimeout(resolve, 1000)); // delay for rate limiting
-    const end_loc = await getLatLong(end);
-
-    if (start_loc == null) {
-      setStartLocation(null);
-    } else {
-      setStartLocation({
-        latitude: parseFloat(start_loc.lat),
-        longitude: parseFloat(start_loc.lon),
-      });
-    }
-    if (end_loc == null) {
-      setEndLocation(null);
-    } else {
-      setEndLocation({
-        latitude: parseFloat(end_loc.lat),
-        longitude: parseFloat(end_loc.lon),
-      });
-    }
-    // query database to acquire drivers nearby
-    setRideState((prev) => ({
-      ...prev,
-      state: 3,
-    }));
   }
 
   return (
@@ -206,18 +105,18 @@ const TravellerScreen = () => {
         <MapView
           style={styles.map}
           region={{
-            latitude: location.latitude,
-            longitude: location.longitude,
+            latitude: currentLocation.latitude,
+            longitude: currentLocation.longitude,
             latitudeDelta: 0.05,
             longitudeDelta: 0.05,
           }}
         >
-          {location.latitude != 0.0 && (
+          {currentLocation.latitude != 0.0 && (
             <Marker
               key={1}
               coordinate={{
-                latitude: location.latitude,
-                longitude: location.longitude,
+                latitude: currentLocation.latitude,
+                longitude: currentLocation.longitude,
               }}
               title={`Start Location`}
             />

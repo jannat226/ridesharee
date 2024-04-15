@@ -433,9 +433,7 @@ import SelectDropdown from "react-native-select-dropdown";
 
 const options = ["Morning", "Evening"];
 const optionsCount = ["1", "2", "3"];
-const NavigateCard = ({
-  getRoute,
-}) => {
+const NavigateCard = ({ getRoute }) => {
   const [startLocationValue, setStartLocationValue] = useState("");
   const [endLocationValue, setEndLocationValue] = useState("");
   const [vehicleType, setVehicleType] = useState(""); // State to store the selected vehicle type
@@ -446,7 +444,6 @@ const NavigateCard = ({
   };
 
   const handleEndLocationChange = (text) => {
-    console.log("Text inside destination change: ",text)
     setEndLocationValue(text);
   };
 
@@ -464,9 +461,13 @@ const NavigateCard = ({
       (timing == options[1] && endLocationValue.trim() === "")
     ) {
       alert("Please enter both your location and destination.");
-    } else {      
-      console.log("before getRoute", endLocationValue)
-      getRoute(timing == "Evening" ? "Christ University" : startLocationValue, timing == "Evening" ? endLocationValue : "Christ University", vehicleType, timing);
+    } else {
+      getRoute(
+        timing == "Evening" ? "Christ University" : startLocationValue,
+        timing == "Evening" ? endLocationValue : "Christ University",
+        vehicleType,
+        timing
+      );
     }
   };
   const AvailableOptionsForStart = ({ options, onSelect, filterValue }) => {
@@ -474,12 +475,12 @@ const NavigateCard = ({
       filterValue === ""
         ? []
         : options
-          .filter(
-            (option) =>
-              option.toLowerCase() != filterValue.toLowerCase() &&
-              option.toLowerCase().includes(filterValue.toLowerCase())
-          )
-          .slice(0, 5);
+            .filter(
+              (option) =>
+                option.toLowerCase() != filterValue.toLowerCase() &&
+                option.toLowerCase().includes(filterValue.toLowerCase())
+            )
+            .slice(0, 5);
     return (
       <FlatList
         data={res}
@@ -498,12 +499,12 @@ const NavigateCard = ({
       filterValue === ""
         ? []
         : options
-          .filter(
-            (option) =>
-              option.toLowerCase() != filterValue.toLowerCase() &&
-              option.toLowerCase().includes(filterValue.toLowerCase())
-          )
-          .slice(0, 5);
+            .filter(
+              (option) =>
+                option.toLowerCase() != filterValue.toLowerCase() &&
+                option.toLowerCase().includes(filterValue.toLowerCase())
+            )
+            .slice(0, 5);
     return (
       <FlatList
         data={res}
@@ -549,7 +550,9 @@ const NavigateCard = ({
             <TextInput
               style={styles.input}
               placeholder="Christ University..."
-              value={timing === options[1] ? "Christ University" : startLocationValue}
+              value={
+                timing === options[1] ? "Christ University" : startLocationValue
+              }
               onChangeText={handleStartLocationChange}
             />
             <AvailableOptionsForStart
@@ -560,7 +563,9 @@ const NavigateCard = ({
             <TextInput
               style={styles.input}
               placeholder="Enter Your Destination..."
-              value={timing === options[0] ? "Christ University" : endLocationValue}
+              value={
+                timing === options[0] ? "Christ University" : endLocationValue
+              }
               onChangeText={handleEndLocationChange}
             />
 

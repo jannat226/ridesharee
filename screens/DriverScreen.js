@@ -412,9 +412,10 @@ const DriverScreen = () => {
   const startListener = async () => {};
 
   const handleShowOnMap = () => {
+    console.log(rideDetails);
     // const openGoogleMaps = (latitude, longitude) => {
     console.log("Open Google Maps");
-    const url = `https://www.google.com/maps/dir/?api=1&destination=${rideDetails?.start?.lat},${rideDetails?.start?.lon}&travelmode=driving`;
+    const url = `https://www.google.com/maps/dir/?api=1&destination=${rideDetails?.latitude},${rideDetails?.longitude}&travelmode=driving`;
     Linking.openURL(url);
     // };
   };
