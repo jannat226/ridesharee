@@ -33,6 +33,7 @@
     "web": {
       "favicon": "./assets/favicon.png"
     },
+    "owner": "spd-project",
     "extra": {
       "eas": {
         "projectId": "09d4afb1-ec85-4af0-9bc3-6ed019a774f5"

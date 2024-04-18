@@ -372,6 +372,7 @@ const RideOptionsCard = ({ route }) => {
         driversRef,
         where("latitude", "<", new_lat_greater),
         where("latitude", ">=", new_lat_smaller),
+        where("state", "!=", "not-accepting"),
         limit(3)
       );
 
